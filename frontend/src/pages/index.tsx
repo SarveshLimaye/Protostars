@@ -1,11 +1,12 @@
 import Image from "next/image";
 import localFont from "next/font/local";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Home() {
   return (
     <>
-      <ConnectButton />
+      <h1 className="text-4xl font-bold text-center mt-40">
+        Welcome to SkillSphere
+      </h1>
     </>
   );
 }
