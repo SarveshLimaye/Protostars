@@ -1,12 +1,7 @@
 import Image from "next/image";
 import localFont from "next/font/local";
+import LandingPage from "@/components/LandingPage/LandingPage";
 
 export default function Home() {
-  return (
-    <>
-      <h1 className="text-4xl font-bold text-center mt-40">
-        Welcome to SkillSphere
-      </h1>
-    </>
-  );
+  return <LandingPage />;
 }
