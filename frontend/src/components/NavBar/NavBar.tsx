@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAccount } from "wagmi";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
+  const { isConnected } = useAccount();
 
   return (
     <header className="fixed top-6 left-6 right-6 z-50">
@@ -36,56 +38,66 @@ export default function Navbar() {
           </Link>
           <div className="flex items-center space-x-6">
             <div className="hidden md:flex items-center space-x-6">
-              {navItems.map((item, index) => (
-                <React.Fragment key={index}>
-                  {item.href === "/register" ? (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      asChild
-                      className="hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      <Link href={item.href} className="text-base font-medium">
-                        {item.name}
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      asChild
-                      className="hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      <Link href={item.href} className="text-base font-medium">
-                        {item.name}
-                      </Link>
-                    </Button>
-                  )}
-                </React.Fragment>
-              ))}
+              {isConnected
+                ? navItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                      {item.href === "/register" ? (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          asChild
+                          className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          <Link
+                            href={item.href}
+                            className="text-base font-medium"
+                          >
+                            {item.name}
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          asChild
+                          className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          <Link
+                            href={item.href}
+                            className="text-base font-medium"
+                          >
+                            {item.name}
+                          </Link>
+                        </Button>
+                      )}
+                    </React.Fragment>
+                  ))
+                : null}
               <ConnectButton />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-primary/20 hover:text-primary"
-                >
-                  <User className="h-6 w-6" />
-                  <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/logout">Logout</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {isConnected ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full hover:bg-primary/20 hover:text-primary"
+                  >
+                    <User className="h-6 w-6" />
+                    <span className="sr-only">Toggle user menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/logout">Logout</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button
