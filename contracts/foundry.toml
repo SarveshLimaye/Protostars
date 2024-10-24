@@ -1,0 +1,5 @@
+[profile.ci.fuzz]
+runs = 10_000
+[profile.default]
+via_ir = true
+libraries = ["src/GambetUtils.sol:GambetUtils:0xFBC9B8306Fa3794AAe7ec3e9a5E3597C8465FEA0"]
