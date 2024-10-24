@@ -97,7 +97,7 @@ function IndividualRegistrationForm() {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
-          process.env.NEXT_PUBLIC_REQUESTSIDE_ADDRESS!,
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
           SkillVerifyAbi,
           signer
         );
@@ -127,7 +127,7 @@ function IndividualRegistrationForm() {
         const signer = ethersProvider.getSigner();
 
         const contract = new ethers.Contract(
-          process.env.NEXT_PUBLIC_REQUESTSIDE_ADDRESS!,
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
           SkillVerifyAbi,
           signer
         );
@@ -228,7 +228,7 @@ function CompanyRegistrationForm() {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_REQUESTSIDE_ADDRESS!,
+        process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
         SkillVerifyAbi,
         signer
       );
@@ -257,7 +257,7 @@ function CompanyRegistrationForm() {
       const signer = ethersProvider.getSigner();
 
       const contract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_REQUESTSIDE_ADDRESS!,
+        process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
         SkillVerifyAbi,
         signer
       );
