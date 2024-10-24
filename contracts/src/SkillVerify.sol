@@ -14,6 +14,8 @@ contract SkillVerify {
     mapping (uint256 => UserInfo) public userIdtoUser;
     mapping (address => uint256) public walletAddressToId;
     mapping(string => uint256) public emailToUserId;
+    mapping(address => bool) public isCompanyWhitelisted;
+    mapping(address => uint256) public wallletToCompanyId;
 
     //Structs
     struct CompanyInfo{
@@ -22,6 +24,7 @@ contract SkillVerify {
         string email;
         string industry;
         uint256 teamSize;
+        address whiteListedWallet;
     }
 
     struct UserInfo{
@@ -55,10 +58,12 @@ contract SkillVerify {
              companyName,
              email,
              industry,
-             teamSize
+             teamSize,
+             msg.sender
            );
            companyIdToCompany[totalCompanies] = newCompany;
-          
+           isCompanyWhitelisted[msg.sender] = true;
+           wallletToCompanyId[msg.sender] = totalCompanies; 
            emit CompanyCreated(totalCompanies, companyName, email, industry, teamSize);
     }
 
@@ -165,5 +170,4 @@ contract SkillVerify {
     function getTotalUsers() external view returns(uint256){
         return totalUsers;
     }
-
 }

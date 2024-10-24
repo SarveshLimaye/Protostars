@@ -1,0 +1,600 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_reclaimAddress",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "companyName",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "industry",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "teamSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "CompanyCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "company",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "role",
+                "type": "string"
+            }
+        ],
+        "name": "EmploymentVerified",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "contributions",
+                "type": "string"
+            }
+        ],
+        "name": "GithubContributionsVerified",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "companyName",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "industry",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "teamSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "registerCompany",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "walletAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "linkdeinProfile",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "githubProfile",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            }
+        ],
+        "name": "registerUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "githubProfile",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "linkdeinProfile",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tierList",
+                "type": "uint256"
+            }
+        ],
+        "name": "UserCreated",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "provider",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "parameters",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "context",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct Claims.ClaimInfo",
+                        "name": "claimInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "bytes32",
+                                        "name": "identifier",
+                                        "type": "bytes32"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint32",
+                                        "name": "timestampS",
+                                        "type": "uint32"
+                                    },
+                                    {
+                                        "internalType": "uint32",
+                                        "name": "epoch",
+                                        "type": "uint32"
+                                    }
+                                ],
+                                "internalType": "struct Claims.CompleteClaimData",
+                                "name": "claim",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "bytes[]",
+                                "name": "signatures",
+                                "type": "bytes[]"
+                            }
+                        ],
+                        "internalType": "struct Claims.SignedClaim",
+                        "name": "signedClaim",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct Reclaim.Proof",
+                "name": "proof",
+                "type": "tuple"
+            },
+            {
+                "internalType": "string",
+                "name": "context",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "contributionField",
+                "type": "string"
+            }
+        ],
+        "name": "verifyProofGithub",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "provider",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "parameters",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "context",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct Claims.ClaimInfo",
+                        "name": "claimInfo",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "bytes32",
+                                        "name": "identifier",
+                                        "type": "bytes32"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint32",
+                                        "name": "timestampS",
+                                        "type": "uint32"
+                                    },
+                                    {
+                                        "internalType": "uint32",
+                                        "name": "epoch",
+                                        "type": "uint32"
+                                    }
+                                ],
+                                "internalType": "struct Claims.CompleteClaimData",
+                                "name": "claim",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "bytes[]",
+                                "name": "signatures",
+                                "type": "bytes[]"
+                            }
+                        ],
+                        "internalType": "struct Claims.SignedClaim",
+                        "name": "signedClaim",
+                        "type": "tuple"
+                    }
+                ],
+                "internalType": "struct Reclaim.Proof",
+                "name": "proof",
+                "type": "tuple"
+            },
+            {
+                "internalType": "string",
+                "name": "context",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "roleField",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "companyField",
+                "type": "string"
+            }
+        ],
+        "name": "verifyProofLinkedin",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "companyIdToCompany",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "companyName",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "email",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "industry",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "teamSize",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "whiteListedWallet",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "emailToUserId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "data",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "target",
+                "type": "string"
+            }
+        ],
+        "name": "extractFieldFromContext",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTotalCompanies",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTotalUsers",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "isCompanyWhitelisted",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "reclaimAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "userIdtoUser",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "walletAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "mail",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "githubProfile",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "linkdeinProfile",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "githubContributions",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "lastRole",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "lastCompany",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tierList",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "walletAddressToId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "wallletToCompanyId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
