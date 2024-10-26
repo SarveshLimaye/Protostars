@@ -1,7 +1,7 @@
 // @ts-nocheck comment
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, User } from "lucide-react";
@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAccount } from "wagmi";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ParticleProvider } from "@particle-network/provider";
+import SkillVerifyAbi from "../../utils/skillverify.json";
+import { ethers } from "ethers";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -26,7 +29,28 @@ const navItems = [
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
-  const { isConnected } = useAccount();
+  const [isCompanyProfile, setisCompanyProfile] = useState(false);
+  const { isConnected, address } = useAccount();
+
+  useEffect(() => {
+    async function checkCompanyProfile() {
+      const provider = new ethers.providers.JsonRpcProvider(
+        process.env.NEXT_PUBLIC_SEPOLIA_RPC!
+      );
+      const contract = new ethers.Contract(
+        process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS,
+        SkillVerifyAbi,
+        provider
+      );
+      const isWhiteListed = await contract.isCompanyWhitelisted(address);
+      console.log(isWhiteListed);
+      setisCompanyProfile(isWhiteListed);
+    }
+
+    if (isConnected) {
+      checkCompanyProfile();
+    }
+  }, [isConnected, address]);
 
   return (
     <header className="fixed top-6 left-6 right-6 z-50">
@@ -79,22 +103,16 @@ export default function Navbar() {
             {isConnected ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full hover:bg-primary/20 hover:text-primary"
-                  >
+                  <Button variant="ghost" size="icon" className="rounded-full">
                     <User className="h-6 w-6" />
                     <span className="sr-only">Toggle user menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/logout">Logout</Link>
+                    <Link href="/profile">
+                      {isCompanyProfile ? "Company Profile" : "Profile"}
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -126,7 +144,7 @@ export default function Navbar() {
                             onOpenChange={setIsOpen}
                             className="justify-center"
                           >
-                            {item.name}
+                            {item.name} {isCompanyProfile ? "09" : "00"}
                           </MobileLink>
                         </Button>
                       ) : (
