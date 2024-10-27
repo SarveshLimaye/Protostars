@@ -3,11 +3,19 @@ const { ReclaimProofRequest } = require("@reclaimprotocol/js-sdk");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const corsOpts = {
+  origin: "*",
+
+  methods: ["GET", "POST"],
+
+  allowedHeaders: ["Content-Type"],
+};
+
 const app = express();
 const port = 5001;
 
 app.use(express.json());
-
+app.use(corsOpts);
 // Route to generate SDK configuration
 app.get("/reclaim/github/generate-config", async (req, res) => {
   const APP_ID = process.env.APP_ID;
