@@ -138,13 +138,6 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-4 md:px-6 lg:px-8 bg-background border-t border-border">
-        <div className="container mx-auto text-center text-muted-foreground">
-          <p>Made with ❤️ by team localhost</p>
-        </div>
-      </footer>
     </div>
   );
 }
