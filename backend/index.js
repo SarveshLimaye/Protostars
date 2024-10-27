@@ -23,10 +23,6 @@ app.get("/reclaim/github/generate-config", async (req, res) => {
       PROVIDER_ID
     );
 
-    reclaimProofRequest.setAppCallbackUrl(
-      "https://your-backend.com/receive-proofs"
-    );
-
     const reclaimProofRequestConfig = reclaimProofRequest.toJsonString();
 
     return res.json({ reclaimProofRequestConfig });
@@ -47,10 +43,6 @@ app.get("/reclaim/linkedin/generate-config", async (req, res) => {
       APP_ID,
       APP_SECRET,
       PROVIDER_ID
-    );
-
-    reclaimProofRequest.setAppCallbackUrl(
-      "https://your-backend.com/receive-proofs"
     );
 
     const reclaimProofRequestConfig = reclaimProofRequest.toJsonString();
