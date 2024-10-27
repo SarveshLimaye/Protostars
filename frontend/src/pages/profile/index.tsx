@@ -27,6 +27,9 @@ export default function Profile() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [githubContributions, setGithubContributions] = useState("");
+  const [lastRole, setLastRole] = useState("");
+  const [lastCompany, setLastCompany] = useState("");
   const { isConnected, address } = useAccount();
 
   const handleSearch = () => {
@@ -297,7 +300,36 @@ export default function Profile() {
       // Handle initialization error (e.g., show error message)
     }
   };
+  const getVerifiedUserData = async () => {
+    try {
+      if (window.ethereum._state.accounts.length !== 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+          SkillVerifyAbi,
+          signer
+        );
 
+        const accounts = await provider.listAccounts();
+        const userID = await contract.walletAddressToId(address);
+
+        const userData = await contract.userIdtoUser(userID);
+
+        console.log(userData);
+        setGithubContributions(
+          userData.githubContributions.trim().replace(/\\n/g, "")
+        );
+
+        setLastRole(userData.lastRole);
+        setLastCompany(userData.lastCompany);
+
+        // toast.success("Github verification submitted successfully!");
+      }
+    } catch (error) {
+      console.error("Error Fetching data", error);
+    }
+  };
   useEffect(() => {
     async function checkCompanyProfile() {
       const provider = new ethers.providers.JsonRpcProvider(
@@ -320,6 +352,10 @@ export default function Profile() {
       console.log(isCompanyProfile, "profile");
     }
   }, [isConnected, address]);
+
+  useEffect(() => {
+    getVerifiedUserData();
+  }, [githubContributions, lastRole, lastCompany]);
 
   return (
     <>
@@ -354,6 +390,9 @@ export default function Profile() {
                 handleVerifyEmployment={handleVerifyEmployment}
                 githubStatus={githubStatus}
                 employmentStatus={employmentStatus}
+                githubContributions={githubContributions}
+                lastRole={lastRole}
+                lastCompany={lastCompany}
               />
             )}
           </div>

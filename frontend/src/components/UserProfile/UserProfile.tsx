@@ -16,11 +16,17 @@ export function UserProfile({
   handleVerifyEmployment,
   githubStatus,
   employmentStatus,
+  githubContributions,
+  lastRole,
+  lastCompany,
 }: {
   handleVerifyGithub: () => void;
   handleVerifyEmployment: () => void;
   githubStatus: string;
   employmentStatus: string;
+  githubContributions: string;
+  lastRole: string;
+  lastCompany: string;
 }) {
   return (
     <Card className="bg-zinc-800 border-zinc-700 text-zinc-100">
@@ -33,22 +39,36 @@ export function UserProfile({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Button
-            onClick={handleVerifyGithub}
-            className="w-full bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-          >
-            <Github className="mr-2 h-4 w-4" />
-            {githubStatus === "" ? "Verify GitHub" : githubStatus}
-          </Button>
+          {githubContributions !== "" ? (
+            <Button className="w-full text-zinc-100 flex justify-center">
+              Total Number of GitHub Contributions this year:{" "}
+              {githubContributions}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleVerifyGithub}
+              className="w-full bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
+            >
+              <Github className="mr-2 h-4 w-4" />
+              {githubStatus === "" ? "Verify GitHub" : githubStatus}
+            </Button>
+          )}
         </div>
         <div>
-          <Button
-            onClick={handleVerifyEmployment}
-            className="w-full bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-          >
-            <Briefcase className="mr-2 h-4 w-4" />
-            {employmentStatus === "" ? "Verify Employment" : employmentStatus}
-          </Button>
+          {lastRole !== "" && lastCompany !== "" ? (
+            <Button className="w-full text-zinc-100 flex justify-center flex-col py-8">
+              <span>Last Company: {lastCompany}</span>
+              <span>Last Role: {lastRole}</span>
+            </Button>
+          ) : (
+            <Button
+              onClick={handleVerifyEmployment}
+              className="w-full bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
+            >
+              <Briefcase className="mr-2 h-4 w-4" />
+              {employmentStatus === "" ? "Verify Employment" : employmentStatus}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -110,7 +110,7 @@ export default function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">
+                    <Link href="/profile" className="cursor-pointer">
                       {isCompanyProfile ? "Company Profile" : "Profile"}
                     </Link>
                   </DropdownMenuItem>
