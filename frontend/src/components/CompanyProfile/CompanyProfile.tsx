@@ -35,7 +35,7 @@ export function CompanyProfile({
 }) {
   const [errors, setErrors] = useState<{ email?: string }>({});
 
-  const search = () => {
+  const validateAndSearch = () => {
     try {
       emailSchema.parse({ email: candidateEmail });
       setErrors({});
@@ -78,10 +78,11 @@ export function CompanyProfile({
               }`}
             />
             <Button
-              onClick={search}
+              onClick={validateAndSearch}
               className="bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
             >
-              <Search className="mr-2 h-4 w-4" /> Search
+              <Search className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Search</span>
             </Button>
           </div>
           {errors.email && (
