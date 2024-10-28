@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Github, Briefcase, Search } from "lucide-react";
+import { z } from "zod";
+
+const emailSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
 
 export function CompanyProfile({
   candidateEmail,
@@ -28,6 +33,27 @@ export function CompanyProfile({
     lastEmployment: string;
   }>;
 }) {
+  const [errors, setErrors] = useState<{ email?: string }>({});
+
+  const search = () => {
+    try {
+      emailSchema.parse({ email: candidateEmail });
+      setErrors({});
+      handleSearch();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors = error.errors.reduce(
+          (acc, curr) => ({
+            ...acc,
+            [curr.path[0]]: curr.message,
+          }),
+          {}
+        );
+        setErrors(formattedErrors);
+      }
+    }
+  };
+
   return (
     <Card className="bg-zinc-800 border-zinc-700 text-zinc-100">
       <CardHeader>
@@ -37,20 +63,30 @@ export function CompanyProfile({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex space-x-2 mb-6">
-          <Input
-            type="email"
-            placeholder="Candidate email"
-            value={candidateEmail}
-            onChange={(e) => setCandidateEmail(e.target.value)}
-            className="bg-zinc-700 border-zinc-600 text-zinc-100 placeholder-zinc-400"
-          />
-          <Button
-            onClick={handleSearch}
-            className="bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-          >
-            <Search className="mr-2 h-4 w-4" /> Search
-          </Button>
+        <div className="space-y-2 mb-6">
+          <div className="flex space-x-2">
+            <Input
+              type="email"
+              placeholder="Candidate email"
+              value={candidateEmail}
+              onChange={(e) => {
+                setCandidateEmail(e.target.value);
+                if (errors.email) setErrors({});
+              }}
+              className={`bg-zinc-700 border-zinc-600 text-zinc-100 placeholder-zinc-400 ${
+                errors.email ? "border-red-500" : ""
+              }`}
+            />
+            <Button
+              onClick={search}
+              className="bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
+            >
+              <Search className="mr-2 h-4 w-4" /> Search
+            </Button>
+          </div>
+          {errors.email && (
+            <span className="text-red-500 text-sm block">{errors.email}</span>
+          )}
         </div>
         <div className="space-y-4">
           {verifiedProfiles.map((profile, index) => (
