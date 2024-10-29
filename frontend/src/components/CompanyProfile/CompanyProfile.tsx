@@ -13,17 +13,12 @@ import {
 import { Search, Github, Briefcase, Linkedin } from "lucide-react";
 import { z } from "zod";
 import { ethers } from "ethers";
+import { Toaster, toast } from "react-hot-toast";
 import SkillVerifyAbi from "../../utils/skillverify.json";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
-
-const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS";
-const CONTRACT_ABI = [
-  "function getTotalUsers() external view returns (uint256)",
-  "function userIdtoUser(uint256) public view returns (tuple(uint256 id, address walletAddress, string mail, string githubProfile, string linkdeinProfile, string githubContributions, string lastRole, string lastCompany, uint256 tierList))",
-];
 
 export function CompanyProfile() {
   const [email, setEmail] = useState("");
@@ -119,9 +114,25 @@ export function CompanyProfile() {
       console.error("Contract interaction error:", error);
     }
   };
+  const sendInvitation = (emailToInvite: string) => {
+    try {
+      fetch("http://localhost:5002/recruiter-invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: emailToInvite }),
+      });
 
+      toast.success("Invitation sent successfully!");
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      toast.error("Failed to send invitation. Please try again.");
+    }
+  };
   return (
     <Card className="bg-zinc-800 border-zinc-700 text-zinc-100 relative">
+      <Toaster position="top-right" />
       {isRegistered !== null && (
         <div className="absolute top-4 right-4">
           <span
@@ -236,7 +247,10 @@ export function CompanyProfile() {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-red-400 mb-4">✗ Email is not registered</p>
-                  <Button className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-600 text-white font-medium py-2 px-8 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl">
+                  <Button
+                    className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-600 text-white font-medium py-2 px-8 rounded-full shadow-lg transition-all duration-200 transform hover:scale-105 hover:shadow-xl"
+                    onClick={() => sendInvitation(email)}
+                  >
                     Invite Candidate
                   </Button>
                 </div>
