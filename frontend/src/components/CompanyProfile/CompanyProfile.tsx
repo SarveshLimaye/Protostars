@@ -137,7 +137,7 @@ export function CompanyProfile() {
       )}
 
       <CardHeader>
-        <CardTitle className="text-white">Email Verification</CardTitle>
+        <CardTitle className="text-white">Candidate Verification</CardTitle>
         <CardDescription className="text-zinc-400">
           Checkout candidate's profile by entering their email
         </CardDescription>
@@ -265,7 +265,7 @@ export function CompanyProfile() {
               >
                 <CardContent className="p-4">
                   <p className="text-zinc-200 font-medium mb-2">
-                    ID: {profile.id}
+                    #{profile.id}
                   </p>
                   <p className="text-zinc-300">{profile.email}</p>
                   <div className="flex space-x-2 mt-3">
