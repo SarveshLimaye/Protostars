@@ -116,7 +116,7 @@ export function CompanyProfile() {
   };
   const sendInvitation = (emailToInvite: string) => {
     try {
-      fetch("http://localhost:5002/recruiter-invite", {
+      fetch(process.env.NEXT_PUBLIC_NODEMAILER_URL!, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

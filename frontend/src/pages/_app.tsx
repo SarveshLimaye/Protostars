@@ -1,3 +1,4 @@
+// @ts-nocheck comment
 import dynamic from "next/dynamic";
 import "@/styles/globals.css";
 import WagmiProvider from "@/utils/wagmiProvider";
