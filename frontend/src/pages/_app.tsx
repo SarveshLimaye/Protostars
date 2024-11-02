@@ -5,7 +5,7 @@ import WagmiProvider from "@/utils/wagmiProvider";
 import type { AppProps } from "next/app";
 import Footer from "@/components/Footer/Footer";
 
-const Navbar = dynamic(() => import("@/components/Navbar/NavBar"), {
+const Navbar = dynamic(() => import("@/components/NavBar/NavBar"), {
   ssr: false,
 });
 
