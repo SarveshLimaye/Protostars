@@ -94,7 +94,8 @@ function IndividualRegistrationForm() {
     console.log("Individual Registration Data:", formData);
 
     try {
-      if (window.ethereum._state.accounts.length !== 0) {
+      if (typeof window.ethereum !== "undefined") {
+        console.log("In MetaMask");
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
@@ -103,7 +104,8 @@ function IndividualRegistrationForm() {
           signer
         );
 
-        const accounts = await provider.listAccounts();
+        const accounts = await provider?.listAccounts();
+
         const tx = await contract.registerUser(
           accounts[0],
           formData.linkedin,
@@ -224,8 +226,7 @@ function CompanyRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Company Registration Data:", formData);
-    if (window.ethereum._state.accounts.length !== 0) {
+    if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
