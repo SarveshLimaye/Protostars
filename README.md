@@ -1,3 +1,7 @@
+### SkillSphere
+
+SkillSphere empowers professionals to verify their qualifications and access opportunities while maintaining pseudonymity.
+
 ### Deployed Contract
 
 ```
