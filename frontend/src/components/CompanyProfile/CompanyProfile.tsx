@@ -435,9 +435,12 @@ export function CompanyProfile() {
                 <FileSpreadsheet className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-white">Bulk Invite</h3>
+                <h3 className="text-lg font-medium text-white">
+                  Bulk Invite Candidates
+                </h3>
                 <p className="text-sm text-zinc-400">
-                  Upload a CSV file with candidate emails
+                  Upload a CSV file containing the email addresses of the
+                  candidates you'd like to invite
                 </p>
               </div>
             </div>
@@ -574,15 +577,16 @@ export function CompanyProfile() {
         </div>
       </CardContent>
 
-      <div className="flex justify-end mt-4 px-6 pb-6">
-        <Button
-          onClick={logAllUserProfiles}
-          className="bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-        >
-          View all candidate profiles
-        </Button>
+      <div className="mt-8 border-t border-zinc-700 pt-6 mb-6 mx-6">
+        <div className="flex justify-end">
+          <Button
+            onClick={logAllUserProfiles}
+            className="bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
+          >
+            View all candidate profiles
+          </Button>
+        </div>
       </div>
-
       {allUserProfiles.length > 0 && (
         <div className="mt-4 px-6 pb-6">
           <div className="flex overflow-x-auto space-x-4 pb-4">
