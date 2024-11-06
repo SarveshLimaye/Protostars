@@ -57,7 +57,7 @@ export default function Navbar() {
       <nav className="container mx-auto rounded-full bg-background/30 backdrop-blur-lg border border-border/40 shadow-lg">
         <div className="px-6 sm:px-8 lg:px-12 mx-auto flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="/assets/logo.png" alt="SkillSphere Logo" width={220} />
+            <img src="/assets/logo.png" alt="SkillSphere Logo" width={200} />
           </Link>
           <div className="flex items-center space-x-6">
             <div className="hidden md:flex items-center space-x-6">
