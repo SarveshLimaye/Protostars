@@ -25,10 +25,19 @@ export default function LandingPage() {
             and access opportunities while maintaining pseudonymity.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" asChild>
+            <Button
+              size="lg"
+              asChild
+              className="relative overflow-hidden transition-all duration-300 hover:bg-[#7B3FE4] hover:scale-105 hover:shadow-lg hover:shadow-[#7B3FE4]/30 before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#7B3FE4]/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-500"
+            >
               <Link href="/register">Get Started</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="transition-all duration-300 hover:border-[#7B3FE4] hover:text-[#7B3FE4] hover:scale-105"
+            >
               <Link href="#how-it-works">Learn More</Link>
             </Button>
           </div>
