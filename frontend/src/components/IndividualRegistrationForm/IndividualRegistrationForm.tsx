@@ -154,18 +154,18 @@ export default function IndividualRegistrationForm() {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-4 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 border-zinc-600 text-white hover:bg-zinc-400"
+                className="flex-1 border-zinc-600 text-white transition-all duration-300 hover:border-[#7B3FE4] hover:text-[#7B3FE4] hover:scale-105"
                 onClick={() => Router.push("/register")}
               >
                 Back
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-zinc-700 text-white hover:bg-zinc-600"
+                className="flex-1 bg-zinc-700 text-white relative overflow-hidden transition-all duration-300 hover:bg-[#7B3FE4] hover:scale-105 hover:shadow-lg hover:shadow-[#7B3FE4]/30 before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#7B3FE4]/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-500"
               >
                 Register as Individual
               </Button>
