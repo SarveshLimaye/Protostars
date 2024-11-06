@@ -10,7 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Github, Briefcase, Linkedin } from "lucide-react";
+import {
+  Search,
+  Github,
+  Briefcase,
+  Linkedin,
+  Upload,
+  X,
+  AlertCircle,
+  Timer,
+  FileSpreadsheet,
+  CheckCircle2,
+} from "lucide-react";
 import { z } from "zod";
 import { ethers } from "ethers";
 import { Toaster, toast } from "react-hot-toast";
@@ -20,13 +31,29 @@ const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
+interface UserProfile {
+  id: string;
+  walletAddress: string;
+  email: string;
+  github: string;
+  linkedin: string;
+  contributions: string;
+  lastRole: string;
+  lastCompany: string;
+  tier: string;
+}
+
 export function CompanyProfile() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<{ email?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean | null>(null);
-  const [allUserProfiles, setAllUserProfiles] = useState<any[]>([]);
+  const [allUserProfiles, setAllUserProfiles] = useState<UserProfile[]>([]);
+  const [csvEmails, setCsvEmails] = useState<string[]>([]);
+  const [invalidEmails, setInvalidEmails] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
 
   const checkEmailRegistration = async () => {
     try {
@@ -112,8 +139,144 @@ export function CompanyProfile() {
       setAllUserProfiles(profiles);
     } catch (error) {
       console.error("Contract interaction error:", error);
+      toast.error("Failed to fetch user profiles");
     }
   };
+
+  const handleCSVUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line && line !== "email"); // Skip header and empty lines
+
+      const validEmails: string[] = [];
+      const invalidEmails: string[] = [];
+
+      lines.forEach((email) => {
+        try {
+          emailSchema.parse({ email });
+          validEmails.push(email);
+        } catch {
+          invalidEmails.push(email);
+        }
+      });
+
+      setCsvEmails(validEmails);
+      setInvalidEmails(invalidEmails);
+
+      toast.success(`Loaded ${validEmails.length} valid email addresses`);
+      if (invalidEmails.length > 0) {
+        toast.error(`Found ${invalidEmails.length} invalid email addresses`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const sendBulkInvitations = () => {
+    if (csvEmails.length === 0) {
+      toast.error("No valid emails to process");
+      return;
+    }
+
+    setIsProcessing(true);
+    setProgress({ current: 0, total: csvEmails.length });
+
+    const failedEmails: { email: string; error: string }[] = [];
+    const MAX_RETRIES = 3;
+    const RATE_LIMIT_DELAY = 1000; // 1 second delay between requests
+
+    for (let i = 0; i < csvEmails.length; i++) {
+      const email = csvEmails[i];
+      let retries = 0;
+      let success = false;
+
+      while (retries < MAX_RETRIES && !success) {
+        try {
+          fetch(process.env.NEXT_PUBLIC_NODEMAILER_URL!, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email }),
+          });
+
+          // if (!response.ok) {
+          //   const errorData = await response.text();
+          //   throw new Error(
+          //     `Server responded with ${response.status}: ${errorData}`
+          //   );
+          // }
+
+          success = true;
+          setProgress((prev) => ({ ...prev, current: i + 1 }));
+
+          // Show progress toast every 5 emails
+          if ((i + 1) % 5 === 0) {
+            toast.success(
+              `Progress: ${i + 1}/${csvEmails.length} emails processed`
+            );
+          }
+        } catch (error) {
+          retries++;
+          console.error(`Attempt ${retries} failed for ${email}:`, error);
+
+          if (retries === MAX_RETRIES) {
+            failedEmails.push({
+              email,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          } else {
+            // Wait before retrying with exponential backoff
+            new Promise((resolve) =>
+              setTimeout(resolve, RATE_LIMIT_DELAY * Math.pow(2, retries - 1))
+            );
+          }
+        }
+      }
+
+      // Rate limiting delay between emails
+      if (i < csvEmails.length - 1) {
+        // Don't delay after the last email
+        new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
+      }
+    }
+
+    setIsProcessing(false);
+
+    if (failedEmails.length > 0) {
+      console.error("Failed emails:", failedEmails);
+      toast.error(
+        `Failed to send ${failedEmails.length} invitation${
+          failedEmails.length > 1 ? "s" : ""
+        }. Check console for details.`,
+        {
+          duration: 5000,
+        }
+      );
+
+      // Show detailed error modal or update UI with failed emails
+      failedEmails.forEach(({ email, error }) => {
+        console.error(`Failed to send invitation to ${email}: ${error}`);
+      });
+    } else {
+      toast.success("All invitations sent successfully!", {
+        duration: 3000,
+      });
+    }
+
+    // Don't clear emails if there were failures, so user can retry
+    if (failedEmails.length === 0) {
+      setCsvEmails([]);
+      setInvalidEmails([]);
+    }
+  };
+
   const sendInvitation = (emailToInvite: string) => {
     try {
       fetch(process.env.NEXT_PUBLIC_NODEMAILER_URL!, {
@@ -130,6 +293,12 @@ export function CompanyProfile() {
       toast.error("Failed to send invitation. Please try again.");
     }
   };
+
+  const clearCSVEmails = () => {
+    setCsvEmails([]);
+    setInvalidEmails([]);
+  };
+
   return (
     <Card className="bg-zinc-800 border-zinc-700 text-zinc-100 relative">
       <Toaster position="top-right" />
@@ -150,7 +319,7 @@ export function CompanyProfile() {
       <CardHeader>
         <CardTitle className="text-white">Candidate Verification</CardTitle>
         <CardDescription className="text-zinc-400">
-          Checkout candidate's profile by entering their email
+          Check candidate profiles or invite candidates individually or in bulk
         </CardDescription>
       </CardHeader>
 
@@ -258,6 +427,151 @@ export function CompanyProfile() {
             </CardContent>
           </Card>
         )}
+
+        <div className="mt-8 space-y-6">
+          <div className="border-t border-zinc-700 pt-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                <FileSpreadsheet className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-white">Bulk Invite</h3>
+                <p className="text-sm text-zinc-400">
+                  Upload a CSV file with candidate emails
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {!csvEmails.length && !invalidEmails.length ? (
+                <div className="border-2 border-dashed border-zinc-700 rounded-lg p-8">
+                  <div className="flex flex-col items-center text-center">
+                    <Input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleCSVUpload}
+                      className="hidden"
+                      id="csv-upload"
+                      disabled={isProcessing}
+                    />
+                    <label
+                      htmlFor="csv-upload"
+                      className="cursor-pointer group flex flex-col items-center justify-center"
+                    >
+                      <div className="h-12 w-12 rounded-full bg-zinc-700 group-hover:bg-zinc-600 flex items-center justify-center transition-colors mb-2">
+                        <Upload className="h-6 w-6 text-zinc-300" />
+                      </div>
+                      <div className="text-zinc-300">
+                        Drop your CSV file here or click to browse
+                      </div>
+                      <p className="text-sm text-zinc-500 mt-1">
+                        Only .csv files are supported
+                      </p>
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-zinc-700/50 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-400" />
+                        <span className="text-zinc-200">
+                          {csvEmails.length} valid email
+                          {csvEmails.length !== 1 ? "s" : ""} ready to send
+                        </span>
+                      </div>
+                      <Button
+                        onClick={clearCSVEmails}
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-zinc-600/50"
+                        disabled={isProcessing}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear
+                      </Button>
+                    </div>
+
+                    <div className="max-h-40 overflow-y-auto rounded-md bg-zinc-800/50 p-3">
+                      {csvEmails.map((email, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2 py-1.5 px-2 rounded hover:bg-zinc-700/30"
+                        >
+                          <div className="h-2 w-2 rounded-full bg-green-400"></div>
+                          <span className="text-sm text-zinc-300">{email}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {invalidEmails.length > 0 && (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <AlertCircle className="h-5 w-5 text-red-400" />
+                        <span className="text-red-400">
+                          {invalidEmails.length} invalid email
+                          {invalidEmails.length !== 1 ? "s" : ""} found
+                        </span>
+                      </div>
+
+                      <div className="max-h-32 overflow-y-auto rounded-md bg-red-500/5 p-3">
+                        {invalidEmails.map((email, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center space-x-2 py-1.5 px-2"
+                          >
+                            <div className="h-2 w-2 rounded-full bg-red-400"></div>
+                            <span className="text-sm text-red-300">
+                              {email}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4">
+                    {isProcessing && (
+                      <div className="flex items-center space-x-2 text-zinc-400">
+                        <Timer className="h-4 w-4 animate-pulse" />
+                        <span className="text-sm">
+                          Processing: {progress.current}/{progress.total}
+                        </span>
+                      </div>
+                    )}
+                    <Button
+                      onClick={sendBulkInvitations}
+                      className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-600 h-11"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <span className="flex items-center space-x-2">
+                          <span className="h-2 w-2 rounded-full bg-white animate-bounce"></span>
+                          <span
+                            className="h-2 w-2 rounded-full bg-white animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></span>
+                          <span
+                            className="h-2 w-2 rounded-full bg-white animate-bounce"
+                            style={{ animationDelay: "0.4s" }}
+                          ></span>
+                        </span>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Send {csvEmails.length} Invitation
+                          {csvEmails.length !== 1 ? "s" : ""}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </CardContent>
 
       <div className="flex justify-end mt-4 px-6 pb-6">
