@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ParticleProvider } from "@particle-network/provider";
 import {
   Card,
   CardContent,
@@ -61,8 +62,21 @@ export function CompanyProfile() {
       setErrors({});
       setIsLoading(true);
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      let signer;
+
+      if (window.ethereum._state.accounts.length !== 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+      } else {
+        //@ts-ignore
+        const particleProvider = new ParticleProvider(particle.auth);
+        const ethersProvider = new ethers.providers.Web3Provider(
+          particleProvider,
+          "any"
+        );
+        signer = ethersProvider.getSigner();
+      }
+
       const contract = new ethers.Contract(
         process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
         SkillVerifyAbi,
@@ -111,8 +125,20 @@ export function CompanyProfile() {
 
   const logAllUserProfiles = async () => {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      let signer;
+      if (window.ethereum._state.accounts.length !== 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+      } else {
+        //@ts-ignore
+        const particleProvider = new ParticleProvider(particle.auth);
+        const ethersProvider = new ethers.providers.Web3Provider(
+          particleProvider,
+          "any"
+        );
+        signer = ethersProvider.getSigner();
+      }
+
       const contract = new ethers.Contract(
         process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
         SkillVerifyAbi,
