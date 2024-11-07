@@ -9,19 +9,39 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ParticleProvider } from "@particle-network/provider";
-import { User, Building2 } from "lucide-react";
+import { User } from "lucide-react";
 import { ethers } from "ethers";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import SkillVerifyAbi from "../../utils/skillverify.json";
 import Router from "next/router";
+import TransactionStatus from "../RegistrationTransactionStatus/IndividualTransactionStatus";
+
+interface FormData {
+  email: string;
+  linkedin: string;
+  github: string;
+}
+
+interface TransactionState {
+  isOpen: boolean;
+  isLoading: boolean;
+  txHash: string;
+  error: Error | null;
+}
 
 export default function IndividualRegistrationForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: "",
     linkedin: "",
     github: "",
+  });
+
+  const [transactionState, setTransactionState] = useState<TransactionState>({
+    isOpen: false,
+    isLoading: false,
+    txHash: "",
+    error: null,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,11 +51,15 @@ export default function IndividualRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Individual Registration Data:", formData);
+    setTransactionState({
+      isOpen: true,
+      isLoading: true,
+      txHash: "",
+      error: null,
+    });
 
     try {
       if (typeof window.ethereum !== "undefined") {
-        console.log("In MetaMask");
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
@@ -53,13 +77,21 @@ export default function IndividualRegistrationForm() {
           formData.email
         );
 
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: true,
+          txHash: tx.hash,
+        }));
+
         await tx.wait(1);
 
-        toast.success("Individual registration submitted successfully!");
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
       } else {
-        //@ts-ignore
+        // @ts-ignore
         const particleProvider = new ParticleProvider(particle.auth);
-        console.log(particleProvider);
         const accounts = await particleProvider.request({
           method: "eth_accounts",
         });
@@ -75,22 +107,45 @@ export default function IndividualRegistrationForm() {
           signer
         );
 
-        // console.log(contract);
-
-        const tx = await contract.registerCompany(
+        const tx = await contract.registerUser(
           accounts[0],
           formData.linkedin,
           formData.github,
           formData.email
         );
 
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: true,
+          txHash: tx.hash,
+        }));
+
         await tx.wait(1);
 
-        toast.success("Individual registration submitted successfully!");
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("An error occurred while submitting the registration");
+      setTransactionState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error,
+      }));
+    }
+  };
+
+  const handleClose = () => {
+    setTransactionState({
+      isOpen: false,
+      isLoading: false,
+      txHash: "",
+      error: null,
+    });
+    if (transactionState.txHash) {
+      Router.push("/");
     }
   };
 
@@ -173,6 +228,15 @@ export default function IndividualRegistrationForm() {
           </form>
         </CardContent>
       </Card>
+
+      <TransactionStatus
+        isOpen={transactionState.isOpen}
+        isLoading={transactionState.isLoading}
+        txHash={transactionState.txHash}
+        error={transactionState.error}
+        onClose={handleClose}
+        formData={formData}
+      />
     </div>
   );
 }

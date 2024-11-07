@@ -9,20 +9,41 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ParticleProvider } from "@particle-network/provider";
-import { User, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { ethers } from "ethers";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Router from "next/router";
 import SkillVerifyAbi from "../../utils/skillverify.json";
+import CompanyTransactionStatus from "../RegistrationTransactionStatus/CompanyTransactionStatus";
+
+interface CompanyFormData {
+  companyName: string;
+  businessEmail: string;
+  industry: string;
+  companySize: string;
+}
+
+interface TransactionState {
+  isOpen: boolean;
+  isLoading: boolean;
+  txHash: string;
+  error: Error | null;
+}
 
 export default function CompanyRegistrationForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CompanyFormData>({
     companyName: "",
     businessEmail: "",
     industry: "",
     companySize: "",
+  });
+
+  const [transactionState, setTransactionState] = useState<TransactionState>({
+    isOpen: false,
+    isLoading: false,
+    txHash: "",
+    error: null,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,56 +53,101 @@ export default function CompanyRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (typeof window.ethereum !== "undefined") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-        SkillVerifyAbi,
-        signer
-      );
+    setTransactionState({
+      isOpen: true,
+      isLoading: true,
+      txHash: "",
+      error: null,
+    });
 
-      const tx = await contract.registerCompany(
-        formData.companyName,
-        formData.businessEmail,
-        formData.industry,
-        Number(formData.companySize)
-      );
+    try {
+      if (typeof window.ethereum !== "undefined") {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+          SkillVerifyAbi,
+          signer
+        );
 
-      await tx.wait(1);
+        const accounts = await provider?.listAccounts();
 
-      toast.success("Company registration submitted successfully!");
-    } else {
-      //@ts-ignore
-      const particleProvider = new ParticleProvider(particle.auth);
-      console.log(particleProvider);
-      const accounts = await particleProvider.request({
-        method: "eth_accounts",
-      });
-      const ethersProvider = new ethers.providers.Web3Provider(
-        particleProvider,
-        "any"
-      );
-      const signer = ethersProvider.getSigner();
+        const tx = await contract.registerCompany(
+          formData.companyName,
+          formData.businessEmail,
+          formData.industry,
+          Number(formData.companySize)
+        );
 
-      const contract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-        SkillVerifyAbi,
-        signer
-      );
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: true,
+          txHash: tx.hash,
+        }));
 
-      // console.log(contract);
+        await tx.wait(1);
 
-      const tx = await contract.registerCompany(
-        formData.companyName,
-        formData.businessEmail,
-        formData.industry,
-        formData.companySize
-      );
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
+      } else {
+        // @ts-ignore
+        const particleProvider = new ParticleProvider(particle.auth);
+        const accounts = await particleProvider.request({
+          method: "eth_accounts",
+        });
+        const ethersProvider = new ethers.providers.Web3Provider(
+          particleProvider,
+          "any"
+        );
+        const signer = ethersProvider.getSigner();
 
-      await tx.wait(1);
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+          SkillVerifyAbi,
+          signer
+        );
 
-      toast.success("Company registration submitted successfully!");
+        const tx = await contract.registerCompany(
+          formData.companyName,
+          formData.businessEmail,
+          formData.industry,
+          Number(formData.companySize)
+        );
+
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: true,
+          txHash: tx.hash,
+        }));
+
+        await tx.wait(1);
+
+        setTransactionState((prev) => ({
+          ...prev,
+          isLoading: false,
+        }));
+      }
+    } catch (error: any) {
+      console.error(error);
+      setTransactionState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error,
+      }));
+    }
+  };
+
+  const handleClose = () => {
+    setTransactionState({
+      isOpen: false,
+      isLoading: false,
+      txHash: "",
+      error: null,
+    });
+    if (transactionState.txHash) {
+      Router.push("/");
     }
   };
 
@@ -91,7 +157,8 @@ export default function CompanyRegistrationForm() {
       <Card className="w-full max-w-2xl bg-zinc-800/80 backdrop-blur-md border-zinc-700/50 shadow-xl text-white overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-zinc-700/30 via-zinc-700/10 to-transparent pointer-events-none"></div>
         <CardHeader className="relative">
-          <CardTitle className="text-3xl font-bold text-center text-white">
+          <CardTitle className="text-3xl font-bold text-center text-white flex items-center justify-center gap-2">
+            <Building2 className="h-8 w-8" />
             Company Registration
           </CardTitle>
           <CardDescription className="text-center text-zinc-300">
@@ -150,6 +217,7 @@ export default function CompanyRegistrationForm() {
               <Input
                 id="companySize"
                 name="companySize"
+                type="number"
                 placeholder="10"
                 required
                 className="bg-black text-white border-zinc-600 placeholder-zinc-400 text-lg"
@@ -176,6 +244,15 @@ export default function CompanyRegistrationForm() {
           </form>
         </CardContent>
       </Card>
+
+      <CompanyTransactionStatus
+        isOpen={transactionState.isOpen}
+        isLoading={transactionState.isLoading}
+        txHash={transactionState.txHash}
+        error={transactionState.error}
+        onClose={handleClose}
+        formData={formData}
+      />
     </div>
   );
 }
