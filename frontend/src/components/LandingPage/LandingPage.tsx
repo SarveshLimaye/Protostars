@@ -147,6 +147,39 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
+
+      <section className="py-16 px-4 md:px-6 lg:px-8 bg-background/50 backdrop-blur-sm">
+        <div className="container mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+            Powered By
+          </h2>
+          <div className="flex justify-center items-center gap-16">
+            {[
+              {
+                name: "Reclaim Protocol",
+                logo: "/assets/reclaim-logo.png",
+              },
+              {
+                name: "Protostars",
+                logo: "/assets/protostars.webp",
+              },
+            ].map((partner, index) => (
+              <div key={index} className="text-center">
+                <Image
+                  src={partner.logo}
+                  alt={`${partner.name} logo`}
+                  width={180}
+                  height={60}
+                  className="mb-2 filter dark:invert transition-all duration-300 hover:opacity-80"
+                />
+                <p className="text-sm font-medium text-muted-foreground">
+                  {partner.name}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
