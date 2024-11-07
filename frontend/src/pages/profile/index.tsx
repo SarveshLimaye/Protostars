@@ -325,6 +325,32 @@ export default function Profile() {
         setLastCompany(userData.lastCompany);
 
         // toast.success("Github verification submitted successfully!");
+      } else {
+        const particleProvider = new ParticleProvider(particle.auth);
+        const accounts = await particleProvider.request({
+          method: "eth_accounts",
+        });
+        const ethersProvider = new ethers.providers.Web3Provider(
+          particleProvider,
+          "any"
+        );
+        const signer = ethersProvider.getSigner();
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+          SkillVerifyAbi,
+          signer
+        );
+        const userID = await contract.walletAddressToId(address);
+
+        const userData = await contract.userIdtoUser(userID);
+
+        console.log(userData);
+        setGithubContributions(
+          userData.githubContributions.trim().replace(/\\n/g, "")
+        );
+
+        setLastRole(userData.lastRole);
+        setLastCompany(userData.lastCompany);
       }
     } catch (error) {
       console.error("Error Fetching data", error);
