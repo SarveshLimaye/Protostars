@@ -332,10 +332,8 @@ export default function Profile() {
         onSuccess: async (proofs) => {
           if (proofs) {
             if (typeof proofs === "string") {
-              // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
               console.log("SDK Message:", proofs);
             } else if (typeof proofs !== "string") {
-              // When using the default callback url, we get a proof object in the response
               setIsModalOpen(false);
               console.log("Proofs", proofs);
               console.log("Proof received:", proofs?.claimData.context);
@@ -344,9 +342,9 @@ export default function Profile() {
               "Proof received. Please sign the transaction."
             );
 
-            const trgt = '"completion_ratio":"';
-            const trgt2 = '"image_480x270":"';
-            const trgt3 = '"title":"';
+            const trgt = 'completion_ratio":"'; // Removed extra double quote
+            const trgt2 = 'image_480x270":"'; // Removed extra double quote
+            const trgt3 = 'title":"'; // Removed extra double quote
 
             const ctx = proofs?.claimData.context;
 
@@ -370,70 +368,79 @@ export default function Profile() {
               claimInfo: claimInfo,
               signedClaim: signedClaim,
             };
-            console.log(trgt, trgt2, trgt3);
-            // if (window.ethereum._state.accounts.length !== 0) {
-            //   const provider = new ethers.providers.Web3Provider(
-            //     window.ethereum
-            //   );
-            //   const signer = provider.getSigner();
-            //   const contract = new ethers.Contract(
-            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-            //     SkillVerifyAbi,
-            //     signer
-            //   );
 
-            //   const accounts = await provider.listAccounts();
-            //   const tx = await contract.verifyProofLinkedin(
-            //     proofObj,
-            //     ctx,
-            //     trgt2,
-            //     trgt
-            //   );
+            try {
+              if (window.ethereum._state.accounts.length !== 0) {
+                const provider = new ethers.providers.Web3Provider(
+                  window.ethereum
+                );
+                const signer = provider.getSigner();
 
-            //   await tx.wait(1);
+                // Get gas estimate first
+                const contract = new ethers.Contract(
+                  process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+                  SkillVerifyAbi,
+                  signer
+                );
 
-            //   toast.success("LinkedIn verification submitted successfully!");
-            // } else {
-            //   //@ts-ignore
-            //   const particleProvider = new ParticleProvider(particle.auth);
-            //   console.log(particleProvider);
-            //   const accounts = await particleProvider.request({
-            //     method: "eth_accounts",
-            //   });
-            //   const ethersProvider = new ethers.providers.Web3Provider(
-            //     particleProvider,
-            //     "any"
-            //   );
-            //   const signer = ethersProvider.getSigner();
+                // Add gas limit and proper error handling
+                const tx = await contract.verifyProofUdemy(
+                  proofObj,
+                  ctx,
+                  trgt,
+                  trgt2,
+                  trgt3,
+                  {
+                    gasLimit: 1000000, // Set a reasonable gas limit
+                  }
+                );
 
-            //   const contract = new ethers.Contract(
-            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-            //     SkillVerifyAbi,
-            //     signer
-            //   );
+                await tx.wait(1);
+                toast.success("Udemy verification submitted successfully!");
+              } else {
+                const particleProvider = new ParticleProvider(particle.auth);
+                const accounts = await particleProvider.request({
+                  method: "eth_accounts",
+                });
+                const ethersProvider = new ethers.providers.Web3Provider(
+                  particleProvider,
+                  "any"
+                );
+                const signer = ethersProvider.getSigner();
 
-            //   // console.log(contract);
+                const contract = new ethers.Contract(
+                  process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+                  SkillVerifyAbi,
+                  signer
+                );
 
-            //   const tx = await contract.verifyProofLinkedin(
-            //     proofObj,
-            //     ctx,
-            //     trgt2,
-            //     trgt
-            //   );
+                // Add gas limit here as well
+                const tx = await contract.verifyProofUdemy(
+                  proofObj,
+                  ctx,
+                  trgt,
+                  trgt2,
+                  trgt3,
+                  {
+                    gasLimit: 1000000, // Set a reasonable gas limit
+                  }
+                );
 
-            //   await tx.wait(1);
-
-            //   toast.success("LinkedIn verification submitted successfully!");
-            // }
+                await tx.wait(1);
+                toast.success("Udemy verification submitted successfully!");
+              }
+            } catch (txError) {
+              console.error("Transaction failed:", txError);
+              toast.error("Transaction failed. Please try again.");
+              setUdemyCoursesStatus("Transaction failed. Please try again.");
+            }
           }
-          // Handle successful verification (e.g., update UI, send to backend)
 
           setUdemyCoursesStatus("Thank you for verifying your udemy profile.");
         },
         onFailure: (error) => {
           console.error("Verification failed", error);
           setUdemyCoursesStatus("Verification failed. Please try again.");
-          // Handle verification failure (e.g., show error message)
         },
       });
 
@@ -446,7 +453,6 @@ export default function Profile() {
     } catch (error) {
       console.error("Error initializing Reclaim:", error);
       setUdemyCoursesStatus("Error initializing Reclaim. Please try again.");
-      // Handle initialization error (e.g., show error message)
     }
   };
 
@@ -509,50 +515,58 @@ export default function Profile() {
             };
             console.log(trgt);
 
-            // if (window.ethereum._state.accounts.length !== 0) {
-            //   const provider = new ethers.providers.Web3Provider(
-            //     window.ethereum
-            //   );
-            //   const signer = provider.getSigner();
-            //   const contract = new ethers.Contract(
-            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-            //     SkillVerifyAbi,
-            //     signer
-            //   );
+            if (window.ethereum._state.accounts.length !== 0) {
+              const provider = new ethers.providers.Web3Provider(
+                window.ethereum
+              );
+              const signer = provider.getSigner();
+              const contract = new ethers.Contract(
+                process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+                SkillVerifyAbi,
+                signer
+              );
 
-            //   const accounts = await provider.listAccounts();
-            //   const tx = await contract.verifyProofGithub(proofObj, ctx, trgt);
+              const accounts = await provider.listAccounts();
+              const tx = await contract.verifyProofLeetcode(
+                proofObj,
+                ctx,
+                trgt
+              );
 
-            //   await tx.wait(1);
+              await tx.wait(1);
 
-            //   toast.success("Github verification submitted successfully!");
-            // } else {
-            //   //@ts-ignore
-            //   const particleProvider = new ParticleProvider(particle.auth);
-            //   console.log(particleProvider);
-            //   const accounts = await particleProvider.request({
-            //     method: "eth_accounts",
-            //   });
-            //   const ethersProvider = new ethers.providers.Web3Provider(
-            //     particleProvider,
-            //     "any"
-            //   );
-            //   const signer = ethersProvider.getSigner();
+              toast.success("Leetcode verification submitted successfully!");
+            } else {
+              //@ts-ignore
+              const particleProvider = new ParticleProvider(particle.auth);
+              console.log(particleProvider);
+              const accounts = await particleProvider.request({
+                method: "eth_accounts",
+              });
+              const ethersProvider = new ethers.providers.Web3Provider(
+                particleProvider,
+                "any"
+              );
+              const signer = ethersProvider.getSigner();
 
-            //   const contract = new ethers.Contract(
-            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
-            //     SkillVerifyAbi,
-            //     signer
-            //   );
+              const contract = new ethers.Contract(
+                process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+                SkillVerifyAbi,
+                signer
+              );
 
-            //   // console.log(contract);
+              // console.log(contract);
 
-            //   const tx = await contract.verifyProofGithub(proofObj, ctx, trgt);
+              const tx = await contract.verifyProofLeetcode(
+                proofObj,
+                ctx,
+                trgt
+              );
 
-            //   await tx.wait(1);
+              await tx.wait(1);
 
-            //   toast.success("Github verification submitted successfully!");
-            // }
+              toast.success("Leetcode verification submitted successfully!");
+            }
           }
           // Handle successful verification (e.g., update UI, send to backend)
           setLeetcodeStatus("Thank you for verifying your Leetcode profile.");
