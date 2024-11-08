@@ -17,6 +17,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
 import { Toaster, toast } from "react-hot-toast";
+import { set } from "zod";
 
 export default function Profile() {
   const [candidateEmail, setCandidateEmail] = useState("");
@@ -612,6 +613,10 @@ export default function Profile() {
 
         setLastRole(userData.lastRole);
         setLastCompany(userData.lastCompany);
+        setCourseCompletionRate(userData.coursesCompletionRate);
+        setLastCourseCompletedImage(userData.lastCourseImage);
+        setLastCourseCompletedTitle(userData.lastCourseTitle);
+        setLeetcodeUsername(userData.leetcodeUserName);
 
         // toast.success("Github verification submitted successfully!");
       } else {
@@ -640,6 +645,9 @@ export default function Profile() {
 
         setLastRole(userData.lastRole);
         setLastCompany(userData.lastCompany);
+        setCourseCompletionRate(userData.courseCompletionRate);
+        setLastCourseCompletedImage(userData.lastCourseImage);
+        setLastCourseCompletedTitle(userData.lastCourseTitle);
       }
     } catch (error) {
       console.error("Error Fetching data", error);
@@ -671,6 +679,8 @@ export default function Profile() {
   useEffect(() => {
     getVerifiedUserData();
   }, [githubContributions, lastRole, lastCompany]);
+
+  console.log(courseCompletionRate, "courseCompletionRate");
 
   return (
     <>
