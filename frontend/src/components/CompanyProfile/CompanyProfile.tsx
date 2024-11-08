@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ParticleProvider } from "@particle-network/provider";
+import { Progress } from "@/components/ui/progress";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import {
   Timer,
   FileSpreadsheet,
   CheckCircle2,
+  SquareCode,
 } from "lucide-react";
 import { z } from "zod";
 import { ethers } from "ethers";
@@ -42,6 +44,10 @@ interface UserProfile {
   lastRole: string;
   lastCompany: string;
   tier: string;
+  leetcodeUserName: string;
+  udemyCourseName: string;
+  udemyCourseImage: string;
+  udemyCourseCompletion: string;
 }
 
 export function CompanyProfile() {
@@ -103,6 +109,10 @@ export function CompanyProfile() {
         lastRole: userInfo.lastRole,
         lastCompany: userInfo.lastCompany,
         tier: userInfo.tierList.toString(),
+        leetcodeUserName: userInfo.leetcodeUserName,
+        udemyCourseImage: userInfo.lastCourseImage,
+        udemyCourseName: userInfo.lastCourseTitle,
+        udemyCourseCompletion: userInfo.coursesCompletionRate,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -150,6 +160,7 @@ export function CompanyProfile() {
       const profiles = [];
       for (let i = 1; i <= totalUsers; i++) {
         const userInfo = await contract.userIdtoUser(i);
+        console.log(userInfo);
         profiles.push({
           id: userInfo.id.toString(),
           walletAddress: userInfo.walletAddress,
@@ -160,6 +171,10 @@ export function CompanyProfile() {
           lastRole: userInfo.lastRole,
           lastCompany: userInfo.lastCompany,
           tier: userInfo.tierList.toString(),
+          leetcodeUserName: userInfo.leetcodeUserName,
+          udemyCourseImage: userInfo.lastCourseImage,
+          udemyCourseName: userInfo.lastCourseTitle,
+          udemyCourseCompletion: userInfo.coursesCompletionRate,
         });
       }
       setAllUserProfiles(profiles);
@@ -415,13 +430,28 @@ export function CompanyProfile() {
                           <span>LinkedIn Profile</span>
                         </a>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 text-zinc-200 hover:text-zinc-100 transition-colors"
+                        >
                           <Briefcase className="h-5 w-5 text-zinc-400" />
-                          <span className="text-zinc-200">
+                          <span>
                             {userProfile.lastRole} at {userProfile.lastCompany}
                           </span>
-                        </div>
+                        </a>
+                        <a
+                          href={`https://leetcode.com/u/${userProfile.leetcodeUserName}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 text-zinc-200 hover:text-zinc-100 transition-colors"
+                        >
+                          <SquareCode className="h-5 w-5" />
+                          <span>Leetcode Profile</span>
+                        </a>
+                      </div>
+                      <div className="space-y-2">
                         <div className="bg-zinc-800 rounded-lg p-4">
                           <div className="flex justify-between items-baseline mb-1">
                             <p className="text-zinc-400 text-sm">
@@ -434,6 +464,39 @@ export function CompanyProfile() {
                           <p className="text-zinc-100 text-2xl font-bold">
                             {userProfile.contributions}
                           </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="bg-zinc-800 rounded-lg p-4">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <img
+                              src={userProfile.udemyCourseImage}
+                              alt="Udemy Course Logo"
+                              className="w-10 h-10 rounded"
+                            />
+                            <div>
+                              <p className="text-zinc-200 font-medium">
+                                {userProfile.udemyCourseName}
+                              </p>
+                              <p className="text-zinc-400 text-sm">
+                                Udemy Course
+                              </p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-zinc-400 text-sm">
+                                Completion
+                              </span>
+                              <span className="text-zinc-200 font-medium">
+                                {userProfile.udemyCourseCompletion}%
+                              </span>
+                            </div>
+                            <Progress
+                              value={userProfile.udemyCourseCompletion}
+                              className="h-2 "
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -642,6 +705,14 @@ export function CompanyProfile() {
                       className="text-zinc-400 hover:text-zinc-200"
                     >
                       <Linkedin className="h-5 w-5" />
+                    </a>
+                    <a
+                      href={`https://leetcode.com/u/${profile.leetcodeUserName}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-zinc-400 hover:text-zinc-200"
+                    >
+                      <SquareCode className="h-5 w-5" />
                     </a>
                   </div>
                 </CardContent>
