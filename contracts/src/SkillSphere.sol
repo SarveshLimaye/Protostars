@@ -39,6 +39,10 @@ contract SkillSphere {
         string githubContributions;
         string lastRole;
         string lastCompany;
+        string coursesCompletionRate;
+        string lastCourseImage;
+        string lastCourseTitle;
+        string leetcodeUserName;
         uint256 tierList;
     }
 
@@ -58,6 +62,12 @@ contract SkillSphere {
     );
     event EmploymentVerified(string company, string role);
     event GithubContributionsVerified(string contributions);
+    event UdemyAccountVerified(
+        string completion_ratio,
+        string image_480x270,
+        string title
+    );
+    event LeetcodeVerified(string username);
 
     constructor(address _reclaimAddress, address _sbtAddress) {
         owner = msg.sender;
@@ -110,6 +120,10 @@ contract SkillSphere {
             "",
             "",
             "",
+            "",
+            "",
+            "",
+            "",
             0
         );
         emailToUserId[email] = totalUsers;
@@ -133,10 +147,11 @@ contract SkillSphere {
         );
         user.githubContributions = contributions;
 
-        // Check if all user profiles are verified
         if (
             bytes(user.githubContributions).length > 0 &&
-            bytes(user.lastRole).length > 0
+            bytes(user.lastRole).length > 0 &&
+            bytes(user.coursesCompletionRate).length > 0 &&
+            bytes(user.leetcodeUserName).length > 0
         ) {
             sbtContract.safeMint(
                 msg.sender,
@@ -163,10 +178,11 @@ contract SkillSphere {
         user.lastCompany = company;
         user.lastRole = role;
 
-        // Check if all user profiles are verified
         if (
             bytes(user.githubContributions).length > 0 &&
-            bytes(user.lastRole).length > 0
+            bytes(user.lastRole).length > 0 &&
+            bytes(user.coursesCompletionRate).length > 0 &&
+            bytes(user.leetcodeUserName).length > 0
         ) {
             sbtContract.safeMint(
                 msg.sender,
@@ -175,6 +191,80 @@ contract SkillSphere {
         }
 
         emit EmploymentVerified(company, role);
+        return true;
+    }
+
+    function verifyProofUdemy(
+        Reclaim.Proof memory proof,
+        string memory context,
+        string memory courseCompletionRateField,
+        string memory lastCourseImageField,
+        string memory lastCourseTitleField
+    ) public returns (bool) {
+        Reclaim(reclaimAddress).verifyProof(proof);
+        uint256 userId = walletAddressToId[msg.sender];
+        require(userId != 0, "User not registered");
+        UserInfo storage user = userIdtoUser[userId];
+        string memory completionRate = extractFieldFromContext(
+            context,
+            courseCompletionRateField
+        );
+        string memory courseImage = extractFieldFromContext(
+            context,
+            lastCourseImageField
+        );
+        string memory courseTitle = extractFieldFromContext(
+            context,
+            lastCourseTitleField
+        );
+        user.coursesCompletionRate = completionRate;
+        user.lastCourseImage = courseImage;
+        user.lastCourseTitle = courseTitle;
+
+        if (
+            bytes(user.githubContributions).length > 0 &&
+            bytes(user.lastRole).length > 0 &&
+            bytes(user.coursesCompletionRate).length > 0 &&
+            bytes(user.leetcodeUserName).length > 0
+        ) {
+            sbtContract.safeMint(
+                msg.sender,
+                "ipfs://bafkreiarf5s56tfgss2izgvncxu64vj3oxncpzmpzctckwgcum2egi2yfy"
+            );
+        }
+
+        emit UdemyAccountVerified(completionRate, courseImage, courseTitle);
+        return true;
+    }
+
+    function verifyProofLeetcode(
+        Reclaim.Proof memory proof,
+        string memory context,
+        string memory leetcodeUserNameField
+    ) public returns (bool) {
+        Reclaim(reclaimAddress).verifyProof(proof);
+        uint256 userId = walletAddressToId[msg.sender];
+        require(userId != 0, "User not registered");
+        UserInfo storage user = userIdtoUser[userId];
+        string memory userName = extractFieldFromContext(
+            context,
+            leetcodeUserNameField
+        );
+        user.leetcodeUserName = userName;
+
+        if (
+            bytes(user.githubContributions).length > 0 &&
+            bytes(user.lastRole).length > 0 &&
+            bytes(user.coursesCompletionRate).length > 0 &&
+            bytes(user.leetcodeUserName).length > 0
+        ) {
+            sbtContract.safeMint(
+                msg.sender,
+                "ipfs://bafkreiarf5s56tfgss2izgvncxu64vj3oxncpzmpzctckwgcum2egi2yfy"
+            );
+        }
+
+        emit LeetcodeVerified(userName);
         return true;
     }
 
