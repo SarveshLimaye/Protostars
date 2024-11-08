@@ -24,12 +24,18 @@ export default function Profile() {
   const [isCompanyProfile, setisCompanyProfile] = useState(false);
   const [githubStatus, setGithubStatus] = useState("");
   const [employmentStatus, setEmploymentStatus] = useState("");
+  const [udemyCoursesStatus, setUdemyCoursesStatus] = useState("");
+  const [leetcodeStatus, setLeetcodeStatus] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [githubContributions, setGithubContributions] = useState("");
   const [lastRole, setLastRole] = useState("");
   const [lastCompany, setLastCompany] = useState("");
+  const [courseCompletionRate, setCourseCompletionRate] = useState("");
+  const [lastCourseCompletedImage, setLastCourseCompletedImage] = useState("");
+  const [lastCourseCompletedTitle, setLastCourseCompletedTitle] = useState("");
+  const [leetcodeUsername, setLeetcodeUsername] = useState("");
   const { isConnected, address } = useAccount();
 
   const handleSearch = () => {
@@ -220,6 +226,8 @@ export default function Profile() {
               signedClaim: signedClaim,
             };
 
+            console.log(trgt, trgt2);
+
             if (window.ethereum._state.accounts.length !== 0) {
               const provider = new ethers.providers.Web3Provider(
                 window.ethereum
@@ -297,6 +305,273 @@ export default function Profile() {
     } catch (error) {
       console.error("Error initializing Reclaim:", error);
       setEmploymentStatus("Error initializing Reclaim. Please try again.");
+      // Handle initialization error (e.g., show error message)
+    }
+  };
+
+  const handleVerifyUdemyCourses = async () => {
+    try {
+      setUdemyCoursesStatus("Initializing...");
+
+      // Fetch the configuration from your backend
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reclaim/udemy/generate-config`
+      );
+      const { reclaimProofRequestConfig } = await response.json();
+
+      // Reconstruct the ReclaimProofRequest object
+      const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(
+        reclaimProofRequestConfig
+      );
+
+      // Generate request URL
+      const requestUrl = await reclaimProofRequest.getRequestUrl();
+
+      // Start the session for better UX
+      await reclaimProofRequest.startSession({
+        onSuccess: async (proofs) => {
+          if (proofs) {
+            if (typeof proofs === "string") {
+              // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
+              console.log("SDK Message:", proofs);
+            } else if (typeof proofs !== "string") {
+              // When using the default callback url, we get a proof object in the response
+              setIsModalOpen(false);
+              console.log("Proofs", proofs);
+              console.log("Proof received:", proofs?.claimData.context);
+            }
+            setUdemyCoursesStatus(
+              "Proof received. Please sign the transaction."
+            );
+
+            const trgt = '"completion_ratio":"';
+            const trgt2 = '"image_480x270":"';
+            const trgt3 = '"title":"';
+
+            const ctx = proofs?.claimData.context;
+
+            const claimInfo = {
+              provider: proofs?.claimData.provider,
+              parameters: proofs?.claimData.parameters,
+              context: proofs?.claimData.context,
+            };
+
+            const signedClaim = {
+              claim: {
+                identifier: proofs?.claimData.identifier,
+                owner: proofs?.claimData.owner,
+                epoch: proofs?.claimData.epoch,
+                timestampS: proofs?.claimData.timestampS,
+              },
+              signatures: proofs?.signatures,
+            };
+
+            const proofObj = {
+              claimInfo: claimInfo,
+              signedClaim: signedClaim,
+            };
+            console.log(trgt, trgt2, trgt3);
+            // if (window.ethereum._state.accounts.length !== 0) {
+            //   const provider = new ethers.providers.Web3Provider(
+            //     window.ethereum
+            //   );
+            //   const signer = provider.getSigner();
+            //   const contract = new ethers.Contract(
+            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+            //     SkillVerifyAbi,
+            //     signer
+            //   );
+
+            //   const accounts = await provider.listAccounts();
+            //   const tx = await contract.verifyProofLinkedin(
+            //     proofObj,
+            //     ctx,
+            //     trgt2,
+            //     trgt
+            //   );
+
+            //   await tx.wait(1);
+
+            //   toast.success("LinkedIn verification submitted successfully!");
+            // } else {
+            //   //@ts-ignore
+            //   const particleProvider = new ParticleProvider(particle.auth);
+            //   console.log(particleProvider);
+            //   const accounts = await particleProvider.request({
+            //     method: "eth_accounts",
+            //   });
+            //   const ethersProvider = new ethers.providers.Web3Provider(
+            //     particleProvider,
+            //     "any"
+            //   );
+            //   const signer = ethersProvider.getSigner();
+
+            //   const contract = new ethers.Contract(
+            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+            //     SkillVerifyAbi,
+            //     signer
+            //   );
+
+            //   // console.log(contract);
+
+            //   const tx = await contract.verifyProofLinkedin(
+            //     proofObj,
+            //     ctx,
+            //     trgt2,
+            //     trgt
+            //   );
+
+            //   await tx.wait(1);
+
+            //   toast.success("LinkedIn verification submitted successfully!");
+            // }
+          }
+          // Handle successful verification (e.g., update UI, send to backend)
+
+          setUdemyCoursesStatus("Thank you for verifying your udemy profile.");
+        },
+        onFailure: (error) => {
+          console.error("Verification failed", error);
+          setUdemyCoursesStatus("Verification failed. Please try again.");
+          // Handle verification failure (e.g., show error message)
+        },
+      });
+
+      console.log("Request URL:", requestUrl);
+      setQrCodeUrl(requestUrl);
+      setUdemyCoursesStatus(
+        "Reclaim process started. Please follow the instructions."
+      );
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error initializing Reclaim:", error);
+      setUdemyCoursesStatus("Error initializing Reclaim. Please try again.");
+      // Handle initialization error (e.g., show error message)
+    }
+  };
+
+  const handleVerifyLeetcode = async () => {
+    try {
+      setLeetcodeStatus("Initializing...");
+
+      // Fetch the configuration from your backend
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/reclaim/leetcode/generate-config`
+      );
+      const { reclaimProofRequestConfig } = await response.json();
+
+      // Reconstruct the ReclaimProofRequest object
+      const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(
+        reclaimProofRequestConfig
+      );
+
+      // Generate request URL
+      const requestUrl = await reclaimProofRequest.getRequestUrl();
+
+      // Start the session for better UX
+      await reclaimProofRequest.startSession({
+        onSuccess: async (proofs) => {
+          if (proofs) {
+            if (typeof proofs === "string") {
+              // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
+              console.log("SDK Message:", proofs);
+            } else if (typeof proofs !== "string") {
+              // When using the default callback url, we get a proof object in the response
+              console.log("Proofs", proofs);
+              setIsModalOpen(false);
+              console.log("Proof received:", proofs?.claimData.context);
+            }
+            setLeetcodeStatus("Proof received. Please sign the transaction.");
+
+            const trgt = '"username":"';
+
+            const ctx = proofs?.claimData.context;
+
+            const claimInfo = {
+              provider: proofs?.claimData.provider,
+              parameters: proofs?.claimData.parameters,
+              context: proofs?.claimData.context,
+            };
+
+            const signedClaim = {
+              claim: {
+                identifier: proofs?.claimData.identifier,
+                owner: proofs?.claimData.owner,
+                epoch: proofs?.claimData.epoch,
+                timestampS: proofs?.claimData.timestampS,
+              },
+              signatures: proofs?.signatures,
+            };
+
+            const proofObj = {
+              claimInfo: claimInfo,
+              signedClaim: signedClaim,
+            };
+            console.log(trgt);
+
+            // if (window.ethereum._state.accounts.length !== 0) {
+            //   const provider = new ethers.providers.Web3Provider(
+            //     window.ethereum
+            //   );
+            //   const signer = provider.getSigner();
+            //   const contract = new ethers.Contract(
+            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+            //     SkillVerifyAbi,
+            //     signer
+            //   );
+
+            //   const accounts = await provider.listAccounts();
+            //   const tx = await contract.verifyProofGithub(proofObj, ctx, trgt);
+
+            //   await tx.wait(1);
+
+            //   toast.success("Github verification submitted successfully!");
+            // } else {
+            //   //@ts-ignore
+            //   const particleProvider = new ParticleProvider(particle.auth);
+            //   console.log(particleProvider);
+            //   const accounts = await particleProvider.request({
+            //     method: "eth_accounts",
+            //   });
+            //   const ethersProvider = new ethers.providers.Web3Provider(
+            //     particleProvider,
+            //     "any"
+            //   );
+            //   const signer = ethersProvider.getSigner();
+
+            //   const contract = new ethers.Contract(
+            //     process.env.NEXT_PUBLIC_SKILLVERIFY_ADDRESS!,
+            //     SkillVerifyAbi,
+            //     signer
+            //   );
+
+            //   // console.log(contract);
+
+            //   const tx = await contract.verifyProofGithub(proofObj, ctx, trgt);
+
+            //   await tx.wait(1);
+
+            //   toast.success("Github verification submitted successfully!");
+            // }
+          }
+          // Handle successful verification (e.g., update UI, send to backend)
+          setLeetcodeStatus("Thank you for verifying your Leetcode profile.");
+        },
+        onFailure: (error) => {
+          console.error("Verification failed", error);
+          setLeetcodeStatus("Verification failed. Please try again.");
+          // Handle verification failure (e.g., show error message)
+        },
+      });
+      console.log("Request URL:", requestUrl);
+      setQrCodeUrl(requestUrl);
+      setLeetcodeStatus(
+        "Reclaim process started. Please follow the instructions."
+      );
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error initializing Reclaim:", error);
+      setLeetcodeStatus("Error initializing Reclaim. Please try again.");
       // Handle initialization error (e.g., show error message)
     }
   };
@@ -414,11 +689,19 @@ export default function Profile() {
               <UserProfile
                 handleVerifyGithub={handleVerifyGithub}
                 handleVerifyEmployment={handleVerifyEmployment}
+                handleVerifyUdemyCourses={handleVerifyUdemyCourses}
+                handleVerifyLeetcode={handleVerifyLeetcode}
                 githubStatus={githubStatus}
                 employmentStatus={employmentStatus}
+                udemyCoursesStatus={udemyCoursesStatus}
                 githubContributions={githubContributions}
+                leetcodeStatus={leetcodeStatus}
                 lastRole={lastRole}
                 lastCompany={lastCompany}
+                courseCompletionRate={courseCompletionRate}
+                lastCourseCompletedImage={lastCourseCompletedImage}
+                lastCourseCompletedTitle={lastCourseCompletedTitle}
+                leetcodeUsername={leetcodeUsername}
               />
             )}
           </div>

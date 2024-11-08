@@ -54,6 +54,50 @@ app.get("/reclaim/linkedin/generate-config", async (req, res) => {
   }
 });
 
+// Route to generate SDK configuration
+app.get("/reclaim/udemy/generate-config", async (req, res) => {
+  const APP_ID = process.env.APP_ID;
+  const APP_SECRET = process.env.APP_SECRET;
+  const PROVIDER_ID = "3ef2059d-ec1e-4107-8187-e35157e527ad";
+
+  try {
+    const reclaimProofRequest = await ReclaimProofRequest.init(
+      APP_ID,
+      APP_SECRET,
+      PROVIDER_ID
+    );
+
+    const reclaimProofRequestConfig = reclaimProofRequest.toJsonString();
+
+    return res.json({ reclaimProofRequestConfig });
+  } catch (error) {
+    console.error("Error generating request config:", error);
+    return res.status(500).json({ error: "Failed to generate request config" });
+  }
+});
+
+// Route to generate SDK configuration
+app.get("/reclaim/leetcode/generate-config", async (req, res) => {
+  const APP_ID = process.env.APP_ID;
+  const APP_SECRET = process.env.APP_SECRET;
+  const PROVIDER_ID = "ee7d77c4-61da-4b87-b9d3-7ebb7560d264";
+
+  try {
+    const reclaimProofRequest = await ReclaimProofRequest.init(
+      APP_ID,
+      APP_SECRET,
+      PROVIDER_ID
+    );
+
+    const reclaimProofRequestConfig = reclaimProofRequest.toJsonString();
+
+    return res.json({ reclaimProofRequestConfig });
+  } catch (error) {
+    console.error("Error generating request config:", error);
+    return res.status(500).json({ error: "Failed to generate request config" });
+  }
+});
+
 // Route to receive proofs
 app.post("/receive-proofs", (req, res) => {
   const proofs = req.body;
