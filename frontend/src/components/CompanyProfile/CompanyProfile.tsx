@@ -493,7 +493,7 @@ export function CompanyProfile() {
                               </span>
                             </div>
                             <Progress
-                              value={userProfile.udemyCourseCompletion}
+                              value={Number(userProfile.udemyCourseCompletion)}
                               className="h-2 "
                             />
                           </div>
