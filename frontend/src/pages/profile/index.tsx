@@ -391,7 +391,7 @@ export default function Profile() {
                   trgt2,
                   trgt3,
                   {
-                    gasLimit: 500000, // Set a reasonable gas limit
+                    gasLimit: 1000000, // Set a reasonable gas limit
                   }
                 );
 
@@ -422,7 +422,7 @@ export default function Profile() {
                   trgt2,
                   trgt3,
                   {
-                    gasLimit: 500000, // Set a reasonable gas limit
+                    gasLimit: 1000000, // Set a reasonable gas limit
                   }
                 );
 
